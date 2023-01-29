@@ -17,14 +17,14 @@ Usage       # Code in main program:
             btn.cbOnClick = yourOnClickMethod
             bnt.cbOnLongClick = yourOnLongclickMethod
             btn.cbOnDoubleClick = yourOnDoubleClickMethod
-
-Wiring      .-------------.     __T__
-            |      GPIO 0 +-----o   o--.
-            |             |            |
-            |  ESP8266    |            |   
-            |             |            |
-            |         GND +------------+---/ GND
-            '-------------'            
+    
+Wiring      .-------------.
+            |     GPIO 14 +----------.
+            |             |          |
+            |  ESP8266    |          |   
+            |             |   _T_    |      ___
+            |         GND +---o o----+-----|___|----> Vcc 
+            '-------------'                 220
 """
 
 from time import ticks_ms
@@ -60,17 +60,17 @@ class DebouncedButton:
             if (ticks_ms() - self._msButtonDown < self._msDebounce):    # button bounces ...
                 pass                                                    # ... ignore 
             elif (ticks_ms() - self._msButtonDown > self._msLongClick):     # time greater 300ms
-                self.cbOnLongClick()                                        # its a long click
+                self.cbOnLongClick()                                        # its a long click, call long click callback
             else:
                 self._clickCount += 1    # count the number of clicks 
                 if self._clickCount == 1: 
                     self._msFirstClick = ticks_ms() # remember time only if its the 1st click
         else:
             if (self._clickCount == 1 and ticks_ms() - self._msFirstClick > self._msDoubleClickGap):  # time after 1st click is greater
-                self._msFirstClick = 0   # reset remembered times                                     # than msDoubleClickGap, i.e. its a click
-                self._clickCount = 0     # and clickcount
-                self.cbOnClick()        # single click callback is called
-            elif self._clickCount > 1:       # more than 1 click occured inbetween msDoubleclickGab
-                self._msFirstClick = 0       # reset remembered time of first click
-                self._clickCount = 0         #       and also the clickcount
-                self.cbOnDoubleClick()      # double click callback is called
+                self._msFirstClick = 0  # reset remembered times                                      # than msDoubleClickGap, i.e. its a click
+                self._clickCount = 0    #       and clickcount
+                self.cbOnClick()        # call single click callback
+            elif self._clickCount > 1:  # more than 1 click occured inbetween msDoubleclickGab
+                self._msFirstClick = 0  # reset remembered time of first click
+                self._clickCount = 0    #       and also the clickcount
+                self.cbOnDoubleClick()  # call double click callback
